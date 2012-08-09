@@ -4,7 +4,7 @@
 import sys
 import socket
 import string
-import urllib
+import urllib2
 import json
 
 HOST="irc.freenode.net"
@@ -46,7 +46,9 @@ while not quiting:
                     content=line.split(" PRIVMSG %s :" % CHAN)[1]
                     for w in content.split():
                         if w.startswith("http:") or w.startswith("https:"):
-                            h=urllib.urlopen(w)
+                            opener=urllib2.build_opener()
+                            opener.addheaders = [("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101")]
+                            h=opener.open(w)
                             if h.code==200:
                                 if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                                     wbuf=h.read(4096)
