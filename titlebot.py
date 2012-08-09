@@ -35,24 +35,31 @@ while 1:
                 s.send("PONG %s\r\n" % sline[1])
             elif sline[1]=="PRIVMSG":
                 rnick=sline[0][1:].split("!")[0]
-                content=line.split(" PRIVMSG %s :" % CHAN)[1]
-                for w in content.split():
-                    if w.startswith("http:") or w.startswith("https:"):
-                        h=urllib.urlopen(w)
-                        if h.code==200:
-                            if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
-                                wbuf=h.read(4096)
-                                if wbuf.find("<title>")!=-1:
-                                    title=wbuf.split("<title>")[1].split("</title>")[0]
-                                    s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
-                            else:
-                                if "Content-Length" in h.info():
-                                    s.send("PRIVMSG %s :⇪文件类型: %s, 文件大小: %s 字节\r\n" % (CHAN, h.info()["Content-Type"], h.info()["Content-Length"]))
+                if line.find(" PRIVMSG %s :" % NICK)!=-1:
+                    if line.split(" PRIVMSG %s :" % NICK)[1]=="Get out of this channel!": # A small hack
+                        s.send("QUIT\r\n")
+                        exit()
+                    else:
+                        s.send("PRIVMSG %s :%s: 我不接受私信哦\r\n" % (rnick, rnick))
+                else:
+                    content=line.split(" PRIVMSG %s :" % CHAN)[1]
+                    for w in content.split():
+                        if w.startswith("http:") or w.startswith("https:"):
+                            h=urllib.urlopen(w)
+                            if h.code==200:
+                                if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
+                                    wbuf=h.read(4096)
+                                    if wbuf.find("<title>")!=-1:
+                                        title=wbuf.split("<title>")[1].split("</title>")[0]
+                                        s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
                                 else:
-                                    s.send("PRIVMSG %s :⇪文件类型: %s\r\n" % (CHAN, h.info()["Content-Type"]))
-                        else:
-                            s.send("PRIVMSG %s :⇪HTTP %d 错误\r\n" % (CHAN, h.code))
+                                    if "Content-Length" in h.info():
+                                        s.send("PRIVMSG %s :⇪文件类型: %s, 文件大小: %s 字节\r\n" % (CHAN, h.info()["Content-Type"], h.info()["Content-Length"]))
+                                    else:
+                                        s.send("PRIVMSG %s :⇪文件类型: %s\r\n" % (CHAN, h.info()["Content-Type"]))
+                            else:
+                                s.send("PRIVMSG %s :⇪HTTP %d 错误\r\n" % (CHAN, h.code))
         except:
-            s.send("PRIVMSG %s :%s 出现了故障。\r\n" % (CHAN, NICK))
+            s.send("PRIVMSG %s :哎呀，%s 好像出了点问题。\r\n" % (CHAN, NICK))
 
 # vim: et ft=python sts=4 sw=4 ts=4
