@@ -22,7 +22,8 @@ s.send("USER %s %s bla :%s\r\n" % (IDENT, HOST, REALNAME))
 s.send("JOIN :%s\r\n" % CHAN)
 socket.setdefaulttimeout(10)
 
-while 1:
+quiting=False
+while not quiting:
     readbuffer=readbuffer+s.recv(1024)
     temp=string.split(readbuffer, "\n")
     readbuffer=temp.pop()
@@ -38,7 +39,7 @@ while 1:
                 if line.find(" PRIVMSG %s :" % NICK)!=-1:
                     if line.split(" PRIVMSG %s :" % NICK)[1]=="Get out of this channel!": # A small hack
                         s.send("QUIT :Client Quit\r\n")
-                        sys.exit()
+                        quiting=True
                     else:
                         s.send("PRIVMSG %s :%s: 我不接受私信哦\r\n" % (rnick, rnick))
                 else:
