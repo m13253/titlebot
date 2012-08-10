@@ -68,6 +68,6 @@ while not quiting:
                             else:
                                 s.send("PRIVMSG %s :⇪HTTP %d 错误\r\n" % (CHAN, h.code))
         except Exception as e:
-            s.send("PRIVMSG %s :哎呀，%s 好像出了点问题: %s。\r\n" % (CHAN, NICK, e))
+            s.send("PRIVMSG %s :哎呀，%s 好像出了点问题: %s\r\n" % (CHAN, NICK, e))
 
 # vim: et ft=python sts=4 sw=4 ts=4
