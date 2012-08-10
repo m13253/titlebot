@@ -5,7 +5,7 @@ import sys
 import socket
 import string
 import urllib2
-import json
+import HTMLParser
 
 HOST="irc.freenode.net"
 PORT=6667
@@ -21,6 +21,8 @@ s.send("NICK %s\r\n" % NICK)
 s.send("USER %s %s bla :%s\r\n" % (IDENT, HOST, REALNAME))
 s.send("JOIN :%s\r\n" % CHAN)
 socket.setdefaulttimeout(10)
+
+html_parser=HTMLParser.HTMLParser()
 
 quiting=False
 while not quiting:
@@ -54,6 +56,7 @@ while not quiting:
                                     wbuf=h.read(4096)
                                     if wbuf.find("<title>")!=-1:
                                         title=wbuf.split("<title>")[1].split("</title>")[0]
+                                        title=html_parser.unescape(title).encode("utf-8").replace("\r", "").replace("\n", " ")
                                         s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
                                 else:
                                     if "Content-Length" in h.info():
