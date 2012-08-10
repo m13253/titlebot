@@ -58,6 +58,8 @@ while not quiting:
                                         title=wbuf.split("<title>")[1].split("</title>")[0]
                                         title=html_parser.unescape(title.decode("utf-8", "replace")).encode("utf-8", "replace").replace("\r", "").replace("\n", " ")
                                         s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
+                                    else:
+                                        s.send("PRIVMSG %s :⇪无标题网页\r\n" % CHAN)
                                 else:
                                     if "Content-Length" in h.info():
                                         s.send("PRIVMSG %s :⇪文件类型: %s, 文件大小: %s 字节\r\n" % (CHAN, h.info()["Content-Type"], h.info()["Content-Length"]))
