@@ -65,7 +65,7 @@ while not quiting:
                                         s.send("PRIVMSG %s :⇪文件类型: %s\r\n" % (CHAN, h.info()["Content-Type"]))
                             else:
                                 s.send("PRIVMSG %s :⇪HTTP %d 错误\r\n" % (CHAN, h.code))
-        except:
-            s.send("PRIVMSG %s :哎呀，%s 好像出了点问题。\r\n" % (CHAN, NICK))
+        except Exception as e:
+            s.send("PRIVMSG %s :哎呀，%s 好像出了点问题: %s。\r\n" % (CHAN, NICK, e))
 
 # vim: et ft=python sts=4 sw=4 ts=4
