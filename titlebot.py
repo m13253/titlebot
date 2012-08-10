@@ -41,7 +41,7 @@ while not quiting:
                         s.send("QUIT :Client Quit\r\n")
                         quiting=True
                     else:
-                        s.send("PRIVMSG %s :%s: 我不接受私信哦\r\n" % (rnick, rnick))
+                        s.send("PRIVMSG %s :%s: 我不接受私信哦。\r\n" % (rnick, rnick))
                 else:
                     content=line.split(" PRIVMSG %s :" % CHAN)[1]
                     for w in content.split():
