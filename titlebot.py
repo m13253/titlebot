@@ -56,7 +56,7 @@ while not quiting:
                                     wbuf=h.read(4096)
                                     if wbuf.find("<title>")!=-1:
                                         title=wbuf.split("<title>")[1].split("</title>")[0]
-                                        title=html_parser.unescape(title).encode("utf-8").replace("\r", "").replace("\n", " ")
+                                        title=html_parser.unescape(unicode(title, "utf-8")).encode("utf-8").replace("\r", "").replace("\n", " ")
                                         s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
                                 else:
                                     if "Content-Length" in h.info():
