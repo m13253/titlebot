@@ -49,14 +49,14 @@ while not quiting:
                     for w in content.split():
                         if w.startswith("http:") or w.startswith("https:"):
                             opener=urllib2.build_opener()
-                            opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language": "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101")]
+                            opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101")]
                             h=opener.open(w)
                             if h.code==200:
                                 if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                                     wbuf=h.read(4096)
                                     if wbuf.find("<title>")!=-1:
                                         title=wbuf.split("<title>")[1].split("</title>")[0]
-                                        title=html_parser.unescape(title.decode("utf-8", "replace")).encode("utf-8", "replace").replace("\r", "").replace("\n", " ")
+                                        title=html_parser.unescape(title.decode("utf-8", "replace")).encode("utf-8", "replace").replace("\r", "").replace("\n", " ").strip()
                                         s.send("PRIVMSG %s :⇪标题: %s\r\n" % (CHAN, title))
                                     else:
                                         s.send("PRIVMSG %s :⇪无标题网页\r\n" % CHAN)
