@@ -12,14 +12,16 @@ PORT=6667
 NICK="titlebot"
 IDENT="titlebot"
 REALNAME="titlebot"
-CHAN="#Orz"
+CHANS=["#Orz"]
 
 readbuffer=""
 s=socket.socket()
 s.connect((HOST, PORT))
 s.send("NICK %s\r\n" % NICK)
 s.send("USER %s %s bla :%s\r\n" % (IDENT, HOST, REALNAME))
-s.send("JOIN :%s\r\n" % CHAN)
+for CHAN in CHANS:
+    s.send("JOIN :%s\r\n" % CHAN)
+CHAN=CHANS[0]
 socket.setdefaulttimeout(10)
 
 html_parser=HTMLParser.HTMLParser()
@@ -38,6 +40,7 @@ while not quiting:
                 s.send("PONG %s\r\n" % sline[1])
             elif sline[1]=="PRIVMSG":
                 rnick=sline[0][1:].split("!")[0]
+                CHAN=sline[2]
                 if line.find(" PRIVMSG %s :" % NICK)!=-1:
                     if line.split(" PRIVMSG %s :" % NICK)[1]=="Get out of this channel!": # A small hack
                         s.send("QUIT :Client Quit\r\n")
