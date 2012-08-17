@@ -52,11 +52,11 @@ while not quiting:
                     for w in content.split():
                         if w.startswith("http:") or w.startswith("https:"):
                             opener=urllib2.build_opener()
-                            opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes")]
+                            opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes")]
                             h=opener.open(w)
                             if h.code==200 or h.code==206:
                                 if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
-                                    wbuf=h.read(4096)
+                                    wbuf=h.read(16384)
                                     if wbuf.find("<title>")!=-1:
                                         title=wbuf.split("<title>")[1].split("</title>")[0]
                                         title=html_parser.unescape(title.decode("utf-8", "replace")).encode("utf-8", "replace").replace("\r", "").replace("\n", " ").strip()
@@ -64,7 +64,9 @@ while not quiting:
                                     else:
                                         s.send("PRIVMSG %s :⇪无标题网页\r\n" % CHAN)
                                 else:
-                                    if "Content-Length" in h.info():
+                                    if "Content-Range" in h.info():
+                                        s.send("PRIVMSG %s :⇪文件类型: %s, 文件大小: %s 字节\r\n" % (CHAN, h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
+                                    elif "Content-Length" in h.info():
                                         s.send("PRIVMSG %s :⇪文件类型: %s, 文件大小: %s 字节\r\n" % (CHAN, h.info()["Content-Type"], h.info()["Content-Length"]))
                                     else:
                                         s.send("PRIVMSG %s :⇪文件类型: %s\r\n" % (CHAN, h.info()["Content-Type"]))
