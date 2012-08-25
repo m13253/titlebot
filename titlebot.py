@@ -68,6 +68,7 @@ while not quiting:
                     c.quit(u"%s asked to leave." % line["nick"])
                     quiting=True
             else:
+                CHAN=line["dest"]
                 for w in line["msg"].split():
                     w=ParseURL(w)
                     if w:
@@ -85,7 +86,7 @@ while not quiting:
                                     c.say(CHAN, u"⇪无标题网页")
                             else:
                                 if "Content-Range" in h.info():
-                                    s.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
+                                    c.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
                                 elif "Content-Length" in h.info():
                                     c.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
                                 else:
