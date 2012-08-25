@@ -31,12 +31,18 @@ def ParseURL(s):
         else:
             return s[min(http_idx, https_idx):]
 
-c=libirc.IRCConnection()
-c.connect(HOST, PORT)
-c.setnick(NICK)
-c.setuser(IDENT, REALNAME)
-for CHAN in CHANS:
-    c.join(CHAN)
+try:
+    c=libirc.IRCConnection()
+    c.connect(HOST, PORT)
+    c.setnick(NICK)
+    c.setuser(IDENT, REALNAME)
+    for CHAN in CHANS:
+        c.join(CHAN)
+except:
+    time.sleep(10)
+    sys.stderr.write("Restarting...\n")
+    os.execlp("python2", "python2", __file__)
+    raise
 CHAN=CHANS[0]
 socket.setdefaulttimeout(10)
 
@@ -51,8 +57,12 @@ while not quiting:
         os.execlp("python2", "python2", __file__)
         break
     try:
-        line=c.parse(block=True)
-        if line["cmd"]=="PRIVMSG":
+        line=c.recvline(block=True)
+        if not line:
+            continue
+        sys.stderr.write("%s\n" % line.encode('utf-8', 'replace'))
+        line=c.parse(line=line)
+        if line and line["cmd"]=="PRIVMSG":
             if line["dest"]==NICK:
                 if line["msg"]==u"Get out of this channel!": # A small hack
                     c.quit(u"%s asked to leave." % line["nick"])
