@@ -80,8 +80,17 @@ while not quiting:
                             if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                                 wbuf=h.read(16384)
                                 if wbuf.find("<title>")!=-1:
-                                    title=wbuf.split("<title>")[1].split("</title>")[0]
-                                    title=html_parser.unescape(title.decode("utf-8", "replace")).replace("\r", "").replace("\n", " ").strip()
+                                    titleenc=wbuf.split("<title>")[1].split("</title>")[0]
+                                    title=None
+                                    for enc in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
+                                        try:
+                                            title=titleenc.decode(enc)
+                                            break
+                                        except UnicodeDecodeError:
+                                            pass
+                                    if title==None:
+                                        title=title.decode("utf-8", "replace")
+                                    title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
                                     c.say(CHAN, u"⇪标题: %s" % title)
                                 else:
                                     c.say(CHAN, u"⇪无标题网页")
