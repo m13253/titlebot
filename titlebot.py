@@ -75,7 +75,7 @@ while not quiting:
                     if w:
                         opener=urllib2.build_opener()
                         opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes")]
-                        h=opener.open(w)
+                        h=opener.open(w.encode("utf-8", "replace"))
                         if h.code==200 or h.code==206:
                             if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                                 wbuf=h.read(16384)
