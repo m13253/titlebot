@@ -16,7 +16,7 @@ PORT=6667
 NICK="titlebot"
 IDENT="titlebot"
 REALNAME="titlebot"
-CHANS=["#Orz"]
+CHANS=["##Orz"]
 
 def ParseURL(s):
     http_idx=s.find('http:')
