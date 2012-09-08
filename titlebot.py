@@ -109,7 +109,7 @@ while not quiting:
             c.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
         except:
             pass
-    except socket.err as e:
+    except socket.error as e:
         sys.stderr.write("Error: %s\n", e)
         c.quit("Network error.")
 
