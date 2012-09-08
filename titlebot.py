@@ -73,6 +73,7 @@ while not quiting:
                 for w in line["msg"].split():
                     w=ParseURL(w)
                     if w:
+                        w=w.split(">", 1)[0].split('"', 1)[0]
                         opener=urllib2.build_opener()
                         opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes")]
                         h=opener.open(w.encode("utf-8", "replace"))
@@ -104,7 +105,10 @@ while not quiting:
                         else:
                             c.say(CHAN, u"⇪HTTP %d 错误\r\n" % h.code)
     except Exception as e:
-        c.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
+        try:
+            c.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
+        except:
+            pass
     except socket.err as e:
         sys.stderr.write("Error: %s\n", e)
         c.quit("Network error.")
