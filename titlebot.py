@@ -34,7 +34,7 @@ def ParseURL(s):
 
 try:
     c=libirc.IRCConnection()
-    c.connect(HOST, PORT)
+    c.connect((HOST, PORT))
     c.setnick(NICK)
     c.setuser(IDENT, REALNAME)
     for CHAN in CHANS:
