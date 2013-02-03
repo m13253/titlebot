@@ -80,6 +80,14 @@ while not quiting:
                         if h.code==200 or h.code==206:
                             if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                                 wbuf=h.read(16384)
+                                read_times=1
+                                while len(wbuf)<16384 and read_times<4:
+                                    read_times+=1
+                                    wbuf_=h.read(16384)
+                                    if wbuf_:
+                                        wbuf+=wbuf_
+                                    else:
+                                        break
                                 if wbuf.find("<title>")!=-1:
                                     titleenc=wbuf.split("<title>")[1].split("</title>")[0]
                                     title=None
