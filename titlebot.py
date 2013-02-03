@@ -8,6 +8,7 @@ import string
 import time
 import urllib2
 import HTMLParser
+import zlib
 
 import libirc
 
@@ -88,6 +89,12 @@ while not quiting:
                                         wbuf+=wbuf_
                                     else:
                                         break
+                                if "Content-Encoding" in h.info() and h.info()["Content-Encoding"]=="gzip": # Fix buggy www.bilibili.tv
+                                    try:
+                                        gunzip_obj=zlib.decompressobj(16+zlib.MAX_WBITS)
+                                        wbuf=gunzip_obj.decompress(wbuf)
+                                    except:
+                                        pass
                                 if wbuf.find("<title>")!=-1:
                                     titleenc=wbuf.split("<title>")[1].split("</title>")[0]
                                     title=None
