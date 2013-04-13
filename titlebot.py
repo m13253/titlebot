@@ -75,6 +75,8 @@ while not quiting:
                     w=ParseURL(w)
                     if w:
                         w=w.split(">", 1)[0].split('"', 1)[0]
+                        if re.match("https?:/*git.io(/|$)", w): # Fix buggy git.io
+                            continue
                         opener=urllib2.build_opener()
                         opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes")]
                         h=opener.open(w.encode("utf-8", "replace"))
