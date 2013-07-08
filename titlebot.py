@@ -20,7 +20,7 @@ PORT=6667
 NICK="titlebot"
 IDENT="titlebot"
 REALNAME="titlebot"
-CHANS=["##Orz"]
+CHANNELS=["##Orz"]
 
 HEADERS = [("Accept-Charset", "utf-8, iso-8859-1"),
            ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"),
@@ -53,14 +53,14 @@ try:
     irc.connect((HOST, PORT))
     irc.setnick(NICK)
     irc.setuser(IDENT, REALNAME)
-    for CHAN in CHANS:
+    for CHAN in CHANNELS:
         irc.join(CHAN)
 except:
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
     raise
-CHAN=CHANS[0]
+CHAN=CHANNELS[0]
 
 html_parser=HTMLParser.HTMLParser()
 
