@@ -72,7 +72,7 @@ def getWebResourceInfo(h):
         if not decodedText:
             decodedText = decodedText.decode("utf-8", "replace")
 
-        decodedText = html_parser.unescape(decodedText).replace("\r", "").replace("\n", " ").strip()
+        decodedText = html_parser().unescape(decodedText).replace("\r", "").replace("\n", " ").strip()
         return decodedText
 
     def readContents(h):
