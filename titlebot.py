@@ -52,7 +52,6 @@ def restartProgram():
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
-    raise Exception
     sys.exit(1)
 
 def getWebResourceInfo(h):
