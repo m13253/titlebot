@@ -17,10 +17,10 @@ import libirc
 
 HOST="irc.freenode.net"
 PORT=6667
-NICK="titlebot"
-IDENT="titlebot"
-REALNAME="titlebot"
-CHANNELS=["##Orz"]
+NICK="titlebot2"
+IDENT="titlebot2"
+REALNAME="titlebot2"
+CHANNELS=["#kneecircle"]
 
 HEADERS = [("Accept-Charset", "utf-8, iso-8859-1"),
            ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"),
@@ -73,19 +73,19 @@ while running:
         os.execlp("python2", "python2", __file__)
         break
     try:
-        line=irc.recvline(block=True)
-        if not line:
+        message=irc.recvline(block=True)
+        if not message:
             continue
-        sys.stderr.write("%s\n" % line.encode('utf-8', 'replace'))
-        line=irc.parse(line=line)
-        if line and line["cmd"]=="PRIVMSG":
-            if line["dest"]==NICK:
-                if line["msg"]==u"Get out of this channel!": # A small hack
-                    irc.quit(u"%s asked to leave." % line["nick"])
+        sys.stderr.write("%s\n" % message.encode('utf-8', 'replace'))
+        message=irc.parse(line=message)
+        if message and message["cmd"]=="PRIVMSG":
+            if message["dest"]==NICK:
+                if message["msg"]==u"Get out of this channel!": # A small hack
+                    irc.quit(u"%s asked to leave." % message["nick"])
                     running = False
             else:
-                channel=line["dest"]
-                for w in line["msg"].split():
+                channel=message["dest"]
+                for w in message["msg"].split():
                     w=pickupUrl(w)
                     if w:
                         w=w.split(">", 1)[0].split('"', 1)[0]
