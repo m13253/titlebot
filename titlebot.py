@@ -59,7 +59,7 @@ except:
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
-    raise
+    raise Exception
 channel=CHANNELS[0]
 
 html_parser=HTMLParser.HTMLParser()
