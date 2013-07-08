@@ -55,6 +55,70 @@ def restartProgram():
     raise Exception
     sys.exit(1)
 
+def getWebResourceInfo(h):
+    webInfo = {
+        "type": "",
+        "title": "",
+        "size": ""
+    }
+
+    def htmlDecode(encodedText):
+        decodedText = ""
+        for encoding in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
+            try:
+                decodedText = encodedText.decode(encoding)
+                break
+            except UnicodeDecodeError:
+                pass
+        if not decodedText:
+            decodedText = decodedText.decode("utf-8", "replace")
+
+        decodedText = html_parser.unescape(decodedText).replace("\r", "").replace("\n", " ").strip()
+        return decodedText
+
+    def readContents(h):
+        """Read a little part of the contents"""
+        contents = ""
+        counter = 1
+        MAX = 5
+        while len(contents) < 16384 and counter < MAX:
+            following_contents = h.read(16384)
+            if following_contents:
+                contents += following_contents
+            else:
+                break
+            counter += 1
+        return contents
+
+    def decompressContents(contents):
+        "Decompress gzipped contents, ignore the error"
+        try:
+            gunzip = zlib.decompressobj(16 + zlib.MAX_WBITS)
+            contents = gunzip.decompress(contents)
+        except:
+            pass
+        return contents
+
+    if h.info()["Content-Type"].split(";")[0] == "text/html" or (not "Content-Type" in h.info()):
+        webInfo["type"] = "text/html"
+        contents = readContents(h)
+
+        if h.info().get("Content-Encoding") == "gzip":  # Fix buggy www.bilibili.tv
+            decompressContents(contents)
+
+        if contents.find("<title>") != -1:
+            encodedTitle = contents.split("<title>")[1].split("</title>")[0]
+            webInfo['title'] = htmlDecode(encodedTitle)
+        else:
+            webInfo['title'] = ""
+    else:
+        webInfo["file_type"] = h.info()["Content-Type"]
+        if "Content-Range" in h.info():
+            webInfo["file_size"] = h.info()["Content-Range"].split("/")[1]
+        elif "Content-Length" in h.info():
+            webInfo["file_size"] = h.info()["Content-Length"]
+
+    return webInfo
 
 try:
     irc = libirc.IRCConnection()
@@ -87,60 +151,35 @@ while running:
             if message["msg"] == u"Get out of this channel!":  # A small hack
                 irc.quit(u"%s asked to leave." % message["nick"])
                 running = False
-        else:
-            channel = message["dest"]
-            words = message["msg"].split()
-            for word in words:
-                word = pickupUrl(word)
-                if not word or inBlacklist(word):
-                    continue
+                break
 
-                opener = urllib2.build_opener()
-                opener.addheaders = HEADERS
-                h = opener.open(word.encode("utf-8", "replace"))
+        channel = message["dest"]
+        words = message["msg"].split()
+        for word in words:
+            word = pickupUrl(word)
+            if not word or inBlacklist(word):
+                continue
 
-                if h.code not in [200, 206]:
-                    irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
-                    continue
+            opener = urllib2.build_opener()
+            opener.addheaders = HEADERS
+            h = opener.open(word.encode("utf-8", "replace"))
 
-                if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
-                    wbuf=h.read(16384)
-                    read_times=1
-                    while len(wbuf)<16384 and read_times<4:
-                        read_times+=1
-                        wbuf_=h.read(16384)
-                        if wbuf_:
-                            wbuf+=wbuf_
-                        else:
-                            break
-                    if "Content-Encoding" in h.info() and h.info()["Content-Encoding"]=="gzip": # Fix buggy www.bilibili.tv
-                        try:
-                            gunzip_obj=zlib.decompressobj(16+zlib.MAX_WBITS)
-                            wbuf=gunzip_obj.decompress(wbuf)
-                        except:
-                            pass
-                    if wbuf.find("<title>")!=-1:
-                        titleenc=wbuf.split("<title>")[1].split("</title>")[0]
-                        title=None
-                        for enc in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
-                            try:
-                                title=titleenc.decode(enc)
-                                break
-                            except UnicodeDecodeError:
-                                pass
-                        if title==None:
-                            title=title.decode("utf-8", "replace")
-                        title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
-                        irc.say(channel, u"⇪标题: %s" % title)
-                    else:
-                        irc.say(channel, u"⇪无标题网页")
-                else:
-                    if "Content-Range" in h.info():
-                        irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
-                    elif "Content-Length" in h.info():
-                        irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
-                    else:
-                        irc.say(channel, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
+            if h.code not in [200, 206]:
+                irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
+                continue
+
+            contentsInfo = getWebResourceInfo(h)
+
+            if contentsInfo["type"] == "text/html" and contentsInfo["title"]:
+                irc.say(channel, u"⇪标题: %s" % contentsInfo["title"])
+            elif contentsInfo["type"] == "text/html" and not contentsInfo["title"]:
+                    irc.say(channel, u"⇪无标题网页")
+            elif contentsInfo["size"]:
+                assert contentsInfo["type"]
+                irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (contentsInfo["type"], contentsInfo["size"]))
+            elif contentsInfo["type"]:
+                irc.say(channel, u"⇪文件类型: %s\r\n" % contentsInfo["type"])
+
     except Exception as e:
         try:
             irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
