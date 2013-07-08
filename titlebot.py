@@ -55,8 +55,8 @@ def inBlacklist(url):
 def restartProgram():
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
-    os.execlp("python2", "python2", __file__)
-    sys.exit(1)
+    python = sys.executable
+    os.execl(python, python, * sys.argv)
 
 
 def getWebResourceInfo(h):
