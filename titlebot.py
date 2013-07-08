@@ -10,7 +10,7 @@ socket.setdefaulttimeout(10)
 
 import time
 import urllib2
-import HTMLParser
+from HTMLParser import HTMLParser as html_parser
 import zlib
 
 import libirc
@@ -67,8 +67,6 @@ except:
     restartProgram()
 
 channel=CHANNELS[0]
-
-html_parser=HTMLParser.HTMLParser()
 
 running = True
 while running:
