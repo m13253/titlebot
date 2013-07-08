@@ -119,73 +119,74 @@ def getWebResourceInfo(h):
 
     return webInfo
 
-try:
-    irc = libirc.IRCConnection()
-    irc.connect((HOST, PORT))
-    irc.setnick(NICK)
-    irc.setuser(IDENT, REALNAME)
-    for channel in CHANNELS:
-        irc.join(channel)
-except:
-    restartProgram()
-
-channel=CHANNELS[0]
-
-running = True
-while running:
-    if not irc.sock:
-        running = False
-        restartProgram()
+if __name__ == "__main__":
     try:
-        text = irc.recvline(block=True)
-        if not text:
-            continue
+        irc = libirc.IRCConnection()
+        irc.connect((HOST, PORT))
+        irc.setnick(NICK)
+        irc.setuser(IDENT, REALNAME)
+        for channel in CHANNELS:
+            irc.join(channel)
+    except:
+        restartProgram()
 
-        sys.stderr.write("%s\n" % text.encode('utf-8', 'replace'))
-        message = irc.parse(line=text)
-        if not message or message["cmd"] != "PRIVMSG":
-            continue
+    channel = CHANNELS[0]
 
-        if message["dest"] == NICK:
-            if message["msg"] == u"Get out of this channel!":  # A small hack
-                irc.quit(u"%s asked to leave." % message["nick"])
-                running = False
-                break
-
-        channel = message["dest"]
-        words = message["msg"].split()
-        for word in words:
-            word = pickupUrl(word)
-            if not word or inBlacklist(word):
-                continue
-
-            opener = urllib2.build_opener()
-            opener.addheaders = HEADERS
-            h = opener.open(word.encode("utf-8", "replace"))
-
-            if h.code not in [200, 206]:
-                irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
-                continue
-
-            contentsInfo = getWebResourceInfo(h)
-
-            if contentsInfo["type"] == "text/html" and contentsInfo["title"]:
-                irc.say(channel, u"⇪标题: %s" % contentsInfo["title"])
-            elif contentsInfo["type"] == "text/html" and not contentsInfo["title"]:
-                    irc.say(channel, u"⇪无标题网页")
-            elif contentsInfo["size"]:
-                assert contentsInfo["type"]
-                irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (contentsInfo["type"], contentsInfo["size"]))
-            elif contentsInfo["type"]:
-                irc.say(channel, u"⇪文件类型: %s\r\n" % contentsInfo["type"])
-
-    except socket.error as e:
-        sys.stderr.write("Error: %s\n", e)
-        irc.quit("Network error.")
-    except Exception as e:
+    running = True
+    while running:
+        if not irc.sock:
+            running = False
+            restartProgram()
         try:
-            irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
-        except:
-            pass
+            text = irc.recvline(block=True)
+            if not text:
+                continue
+
+            sys.stderr.write("%s\n" % text.encode('utf-8', 'replace'))
+            message = irc.parse(line=text)
+            if not message or message["cmd"] != "PRIVMSG":
+                continue
+
+            if message["dest"] == NICK:
+                if message["msg"] == u"Get out of this channel!":  # A small hack
+                    irc.quit(u"%s asked to leave." % message["nick"])
+                    running = False
+                    break
+
+            channel = message["dest"]
+            words = message["msg"].split()
+            for word in words:
+                word = pickupUrl(word)
+                if not word or inBlacklist(word):
+                    continue
+
+                opener = urllib2.build_opener()
+                opener.addheaders = HEADERS
+                h = opener.open(word.encode("utf-8", "replace"))
+
+                if h.code not in [200, 206]:
+                    irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
+                    continue
+
+                contentsInfo = getWebResourceInfo(h)
+
+                if contentsInfo["type"] == "text/html" and contentsInfo["title"]:
+                    irc.say(channel, u"⇪标题: %s" % contentsInfo["title"])
+                elif contentsInfo["type"] == "text/html" and not contentsInfo["title"]:
+                        irc.say(channel, u"⇪无标题网页")
+                elif contentsInfo["size"]:
+                    assert contentsInfo["type"]
+                    irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (contentsInfo["type"], contentsInfo["size"]))
+                elif contentsInfo["type"]:
+                    irc.say(channel, u"⇪文件类型: %s\r\n" % contentsInfo["type"])
+
+        except socket.error as e:
+            sys.stderr.write("Error: %s\n", e)
+            irc.quit("Network error.")
+        except Exception as e:
+            try:
+                irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
+            except:
+                pass
 
 # vim: et ft=python sts=4 sw=4 ts=4
