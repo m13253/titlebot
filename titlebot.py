@@ -97,51 +97,52 @@ while running:
                 if not word or inBlacklist(word):
                     continue
 
-                opener=urllib2.build_opener()
+                opener = urllib2.build_opener()
                 opener.addheaders = HEADERS
-                h=opener.open(word.encode("utf-8", "replace"))
+                h = opener.open(word.encode("utf-8", "replace"))
 
-                if h.code == 200 or h.code == 206:
-                    if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
-                        wbuf=h.read(16384)
-                        read_times=1
-                        while len(wbuf)<16384 and read_times<4:
-                            read_times+=1
-                            wbuf_=h.read(16384)
-                            if wbuf_:
-                                wbuf+=wbuf_
-                            else:
-                                break
-                        if "Content-Encoding" in h.info() and h.info()["Content-Encoding"]=="gzip": # Fix buggy www.bilibili.tv
-                            try:
-                                gunzip_obj=zlib.decompressobj(16+zlib.MAX_WBITS)
-                                wbuf=gunzip_obj.decompress(wbuf)
-                            except:
-                                pass
-                        if wbuf.find("<title>")!=-1:
-                            titleenc=wbuf.split("<title>")[1].split("</title>")[0]
-                            title=None
-                            for enc in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
-                                try:
-                                    title=titleenc.decode(enc)
-                                    break
-                                except UnicodeDecodeError:
-                                    pass
-                            if title==None:
-                                title=title.decode("utf-8", "replace")
-                            title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
-                            irc.say(channel, u"⇪标题: %s" % title)
-                        else:
-                            irc.say(channel, u"⇪无标题网页")
-                    else:
-                        if "Content-Range" in h.info():
-                            irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
-                        elif "Content-Length" in h.info():
-                            irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
-                        else:
-                            irc.say(channel, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
-                else:
+                if h.code not in [200, 206]:
                     irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
+                    continue
+
+                if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
+                    wbuf=h.read(16384)
+                    read_times=1
+                    while len(wbuf)<16384 and read_times<4:
+                        read_times+=1
+                        wbuf_=h.read(16384)
+                        if wbuf_:
+                            wbuf+=wbuf_
+                        else:
+                            break
+                    if "Content-Encoding" in h.info() and h.info()["Content-Encoding"]=="gzip": # Fix buggy www.bilibili.tv
+                        try:
+                            gunzip_obj=zlib.decompressobj(16+zlib.MAX_WBITS)
+                            wbuf=gunzip_obj.decompress(wbuf)
+                        except:
+                            pass
+                    if wbuf.find("<title>")!=-1:
+                        titleenc=wbuf.split("<title>")[1].split("</title>")[0]
+                        title=None
+                        for enc in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
+                            try:
+                                title=titleenc.decode(enc)
+                                break
+                            except UnicodeDecodeError:
+                                pass
+                        if title==None:
+                            title=title.decode("utf-8", "replace")
+                        title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
+                        irc.say(channel, u"⇪标题: %s" % title)
+                    else:
+                        irc.say(channel, u"⇪无标题网页")
+                else:
+                    if "Content-Range" in h.info():
+                        irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
+                    elif "Content-Length" in h.info():
+                        irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
+                    else:
+                        irc.say(channel, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
     except Exception as e:
         try:
             irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
