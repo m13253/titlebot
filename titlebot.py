@@ -42,7 +42,7 @@ def pickupUrl(text):
     return None
 
 def inBlacklist(url):
-    if re.match("https?:/*git.io(/|$)", w):
+    if re.match("https?:/*git.io(/|$)", word):
         # git.io is buggy
         return True
     return False
@@ -84,21 +84,22 @@ while running:
         if not message or message["cmd"] != "PRIVMSG":
             continue
 
-        if message["dest"]==NICK:
-            if message["msg"]==u"Get out of this channel!": # A small hack
+        if message["dest"] == NICK:
+            if message["msg"] == u"Get out of this channel!":  # A small hack
                 irc.quit(u"%s asked to leave." % message["nick"])
                 running = False
         else:
-            channel=message["dest"]
-            for w in message["msg"].split():
-                w=pickupUrl(w)
-                if w:
-                    w=w.split(">", 1)[0].split('"', 1)[0]
-                    if inBlacklist(w):
+            channel = message["dest"]
+            words = message["msg"].split()
+            for word in words:
+                word = pickupUrl(word)
+                if word:
+                    word=word.split(">", 1)[0].split('"', 1)[0]
+                    if inBlacklist(word):
                         continue
                     opener=urllib2.build_opener()
                     opener.addheaders = HEADERS
-                    h=opener.open(w.encode("utf-8", "replace"))
+                    h=opener.open(word.encode("utf-8", "replace"))
                     if h.code==200 or h.code==206:
                         if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
                             wbuf=h.read(16384)
