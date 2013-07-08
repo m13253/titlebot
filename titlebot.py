@@ -15,12 +15,12 @@ import zlib
 
 import libirc
 
-HOST="irc.freenode.net"
-PORT=6667
-NICK="titlebot2"
-IDENT="titlebot2"
-REALNAME="titlebot2"
-CHANNELS=["#kneecircle"]
+HOST = "irc.freenode.net"
+PORT = 6667
+NICK = "titlebot2"
+IDENT = "titlebot2"
+REALNAME = "titlebot2"
+CHANNELS = ["#kneecircle"]
 
 HEADERS = [("Accept-Charset", "utf-8, iso-8859-1"),
            ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"),
@@ -57,7 +57,7 @@ def restartProgram():
 
 
 try:
-    irc=libirc.IRCConnection()
+    irc = libirc.IRCConnection()
     irc.connect((HOST, PORT))
     irc.setnick(NICK)
     irc.setuser(IDENT, REALNAME)
