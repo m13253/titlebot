@@ -19,19 +19,15 @@ IDENT="titlebot"
 REALNAME="titlebot"
 CHANS=["##Orz"]
 
-def pickupUrl(s):
-    http_idx=s.find('http:')
-    https_idx=s.find('https:')
-    if https_idx==-1:
-        if http_idx==-1:
-            return None
-        else:
-            return s[http_idx:]
-    else:
-        if http_idx==-1:
-            return s[https_idx:]
-        else:
-            return s[min(http_idx, https_idx):]
+def pickupUrl(text):
+    """Return a vaild URL from a string"""
+
+    PROTOCOLS = ["http:", "https:"]
+    for protocol in PROTOCOLS:
+        index = text.find(protocol)
+        if index != -1:
+            return text[index:]
+    return None
 
 try:
     c=libirc.IRCConnection()
