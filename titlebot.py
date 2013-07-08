@@ -111,11 +111,11 @@ def getWebResourceInfo(h):
         else:
             webInfo['title'] = ""
     else:
-        webInfo["file_type"] = h.info()["Content-Type"]
+        webInfo["type"] = h.info()["Content-Type"]
         if "Content-Range" in h.info():
-            webInfo["file_size"] = h.info()["Content-Range"].split("/")[1]
+            webInfo["size"] = h.info()["Content-Range"].split("/")[1]
         elif "Content-Length" in h.info():
-            webInfo["file_size"] = h.info()["Content-Length"]
+            webInfo["size"] = h.info()["Content-Length"]
 
     return webInfo
 
