@@ -19,7 +19,7 @@ IDENT="titlebot"
 REALNAME="titlebot"
 CHANS=["##Orz"]
 
-def ParseURL(s):
+def pickupUrl(s):
     http_idx=s.find('http:')
     https_idx=s.find('https:')
     if https_idx==-1:
@@ -72,7 +72,7 @@ while not quiting:
             else:
                 CHAN=line["dest"]
                 for w in line["msg"].split():
-                    w=ParseURL(w)
+                    w=pickupUrl(w)
                     if w:
                         w=w.split(">", 1)[0].split('"', 1)[0]
                         if re.match("https?:/*git.io(/|$)", w): # Fix buggy git.io
