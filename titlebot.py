@@ -42,6 +42,7 @@ def pickupUrl(text):
     return None
 
 def inBlacklist(url):
+    url = url.split(">", 1)[0].split('"', 1)[0]
     if re.match("https?:/*git.io(/|$)", url):
         # git.io is buggy
         return True
@@ -93,11 +94,7 @@ while running:
             words = message["msg"].split()
             for word in words:
                 word = pickupUrl(word)
-                if not word:
-                    continue
-
-                word = word.split(">", 1)[0].split('"', 1)[0]
-                if inBlacklist(word):
+                if not word or inBlacklist(word):
                     continue
 
                 opener=urllib2.build_opener()
