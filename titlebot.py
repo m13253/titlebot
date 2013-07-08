@@ -46,10 +46,10 @@ socket.setdefaulttimeout(10)
 
 html_parser=HTMLParser.HTMLParser()
 
-quiting=False
-while not quiting:
+running = True
+while running:
     if not irc.sock:
-        quiting=True
+        running = False
         time.sleep(10)
         sys.stderr.write("Restarting...\n")
         os.execlp("python2", "python2", __file__)
@@ -64,7 +64,7 @@ while not quiting:
             if line["dest"]==NICK:
                 if line["msg"]==u"Get out of this channel!": # A small hack
                     irc.quit(u"%s asked to leave." % line["nick"])
-                    quiting=True
+                    running = False
             else:
                 CHAN=line["dest"]
                 for w in line["msg"].split():
