@@ -38,6 +38,13 @@ def pickupUrl(text):
             return text[index:]
     return None
 
+def inBlacklist(url):
+    if re.match("https?:/*git.io(/|$)", w):
+        # git.io is buggy
+        return True
+    return False
+
+
 try:
     irc=libirc.IRCConnection()
     irc.connect((HOST, PORT))
@@ -80,7 +87,7 @@ while running:
                     w=pickupUrl(w)
                     if w:
                         w=w.split(">", 1)[0].split('"', 1)[0]
-                        if re.match("https?:/*git.io(/|$)", w): # Fix buggy git.io
+                        if inBlacklist(w):
                             continue
                         opener=urllib2.build_opener()
                         opener.addheaders = HEADERS
