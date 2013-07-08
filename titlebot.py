@@ -4,7 +4,10 @@
 import os
 import sys
 import re
+
 import socket
+socket.setdefaulttimeout(10)
+
 import time
 import urllib2
 import HTMLParser
@@ -58,7 +61,6 @@ except:
     os.execlp("python2", "python2", __file__)
     raise
 CHAN=CHANS[0]
-socket.setdefaulttimeout(10)
 
 html_parser=HTMLParser.HTMLParser()
 
