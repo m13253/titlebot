@@ -30,12 +30,12 @@ def pickupUrl(text):
     return None
 
 try:
-    c=libirc.IRCConnection()
-    c.connect((HOST, PORT))
-    c.setnick(NICK)
-    c.setuser(IDENT, REALNAME)
+    irc=libirc.IRCConnection()
+    irc.connect((HOST, PORT))
+    irc.setnick(NICK)
+    irc.setuser(IDENT, REALNAME)
     for CHAN in CHANS:
-        c.join(CHAN)
+        irc.join(CHAN)
 except:
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
@@ -48,22 +48,22 @@ html_parser=HTMLParser.HTMLParser()
 
 quiting=False
 while not quiting:
-    if not c.sock:
+    if not irc.sock:
         quiting=True
         time.sleep(10)
         sys.stderr.write("Restarting...\n")
         os.execlp("python2", "python2", __file__)
         break
     try:
-        line=c.recvline(block=True)
+        line=irc.recvline(block=True)
         if not line:
             continue
         sys.stderr.write("%s\n" % line.encode('utf-8', 'replace'))
-        line=c.parse(line=line)
+        line=irc.parse(line=line)
         if line and line["cmd"]=="PRIVMSG":
             if line["dest"]==NICK:
                 if line["msg"]==u"Get out of this channel!": # A small hack
-                    c.quit(u"%s asked to leave." % line["nick"])
+                    irc.quit(u"%s asked to leave." % line["nick"])
                     quiting=True
             else:
                 CHAN=line["dest"]
@@ -105,25 +105,25 @@ while not quiting:
                                     if title==None:
                                         title=title.decode("utf-8", "replace")
                                     title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
-                                    c.say(CHAN, u"⇪标题: %s" % title)
+                                    irc.say(CHAN, u"⇪标题: %s" % title)
                                 else:
-                                    c.say(CHAN, u"⇪无标题网页")
+                                    irc.say(CHAN, u"⇪无标题网页")
                             else:
                                 if "Content-Range" in h.info():
-                                    c.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
+                                    irc.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
                                 elif "Content-Length" in h.info():
-                                    c.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
+                                    irc.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
                                 else:
-                                    c.say(CHAN, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
+                                    irc.say(CHAN, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
                         else:
-                            c.say(CHAN, u"⇪HTTP %d 错误\r\n" % h.code)
+                            irc.say(CHAN, u"⇪HTTP %d 错误\r\n" % h.code)
     except Exception as e:
         try:
-            c.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
+            irc.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
         except:
             pass
     except socket.error as e:
         sys.stderr.write("Error: %s\n", e)
-        c.quit("Network error.")
+        irc.quit("Network error.")
 
 # vim: et ft=python sts=4 sw=4 ts=4
