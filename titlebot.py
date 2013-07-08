@@ -91,7 +91,7 @@ def getWebResourceInfo(h):
         return contents
 
     def decompressContents(contents):
-        "Decompress gzipped contents, ignore the error"
+        """Decompress gzipped contents, ignore the error"""
         try:
             gunzip = zlib.decompressobj(16 + zlib.MAX_WBITS)
             contents = gunzip.decompress(contents)
