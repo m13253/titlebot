@@ -53,14 +53,14 @@ try:
     irc.connect((HOST, PORT))
     irc.setnick(NICK)
     irc.setuser(IDENT, REALNAME)
-    for CHAN in CHANNELS:
-        irc.join(CHAN)
+    for channel in CHANNELS:
+        irc.join(channel)
 except:
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
     raise
-CHAN=CHANNELS[0]
+channel=CHANNELS[0]
 
 html_parser=HTMLParser.HTMLParser()
 
@@ -84,7 +84,7 @@ while running:
                     irc.quit(u"%s asked to leave." % line["nick"])
                     running = False
             else:
-                CHAN=line["dest"]
+                channel=line["dest"]
                 for w in line["msg"].split():
                     w=pickupUrl(w)
                     if w:
@@ -123,21 +123,21 @@ while running:
                                     if title==None:
                                         title=title.decode("utf-8", "replace")
                                     title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
-                                    irc.say(CHAN, u"⇪标题: %s" % title)
+                                    irc.say(channel, u"⇪标题: %s" % title)
                                 else:
-                                    irc.say(CHAN, u"⇪无标题网页")
+                                    irc.say(channel, u"⇪无标题网页")
                             else:
                                 if "Content-Range" in h.info():
-                                    irc.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
+                                    irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Range"].split("/")[1]))
                                 elif "Content-Length" in h.info():
-                                    irc.say(CHAN, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
+                                    irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (h.info()["Content-Type"], h.info()["Content-Length"]))
                                 else:
-                                    irc.say(CHAN, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
+                                    irc.say(channel, u"⇪文件类型: %s\r\n" % h.info()["Content-Type"])
                         else:
-                            irc.say(CHAN, u"⇪HTTP %d 错误\r\n" % h.code)
+                            irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
     except Exception as e:
         try:
-            irc.say(CHAN, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
+            irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
         except:
             pass
     except socket.error as e:
