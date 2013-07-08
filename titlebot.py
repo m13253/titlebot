@@ -47,6 +47,13 @@ def inBlacklist(url):
         return True
     return False
 
+def restartProgram():
+    time.sleep(10)
+    sys.stderr.write("Restarting...\n")
+    os.execlp("python2", "python2", __file__)
+    raise Exception
+    sys.exit(1)
+
 
 try:
     irc=libirc.IRCConnection()
@@ -56,10 +63,8 @@ try:
     for channel in CHANNELS:
         irc.join(channel)
 except:
-    time.sleep(10)
-    sys.stderr.write("Restarting...\n")
-    os.execlp("python2", "python2", __file__)
-    raise Exception
+    restartProgram()
+
 channel=CHANNELS[0]
 
 html_parser=HTMLParser.HTMLParser()
@@ -68,16 +73,14 @@ running = True
 while running:
     if not irc.sock:
         running = False
-        time.sleep(10)
-        sys.stderr.write("Restarting...\n")
-        os.execlp("python2", "python2", __file__)
-        break
+        restartProgram()
     try:
-        message=irc.recvline(block=True)
-        if not message:
+        text = irc.recvline(block=True)
+        if not text:
             continue
-        sys.stderr.write("%s\n" % message.encode('utf-8', 'replace'))
-        message=irc.parse(line=message)
+
+        sys.stderr.write("%s\n" % text.encode('utf-8', 'replace'))
+        message=irc.parse(line=text)
         if message and message["cmd"]=="PRIVMSG":
             if message["dest"]==NICK:
                 if message["msg"]==u"Get out of this channel!": # A small hack
