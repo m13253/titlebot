@@ -154,7 +154,7 @@ if __name__ == "__main__":
                 continue
 
             if message["dest"] == NICK:
-                if message["nick"] in ADMINS:
+                if message["nick"] in ADMINS or not ADMINS:
                     if message["msg"] == u"Get out of this channel!":  # A small hack
                         irc.quit(u"%s asked to leave." % message["nick"])
                         running = False
