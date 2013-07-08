@@ -42,7 +42,7 @@ def pickupUrl(text):
     return None
 
 def inBlacklist(url):
-    if re.match("https?:/*git.io(/|$)", word):
+    if re.match("https?:/*git.io(/|$)", url):
         # git.io is buggy
         return True
     return False
