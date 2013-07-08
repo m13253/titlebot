@@ -31,6 +31,7 @@ HEADERS = [("Accept-Charset", "utf-8, iso-8859-1"),
            ("X-Prefetch", "yes"),
            ("X-Requested-With", "Titlebot")]
 
+
 def pickupUrl(text):
     """Return a vaild URL from a string"""
 
@@ -41,6 +42,7 @@ def pickupUrl(text):
             return text[index:]
     return None
 
+
 def inBlacklist(url):
     url = url.split(">", 1)[0].split('"', 1)[0]
     if re.match("https?:/*git.io(/|$)", url):
@@ -48,11 +50,13 @@ def inBlacklist(url):
         return True
     return False
 
+
 def restartProgram():
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
     sys.exit(1)
+
 
 def getWebResourceInfo(h):
     webInfo = {
