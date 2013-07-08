@@ -180,13 +180,13 @@ while running:
             elif contentsInfo["type"]:
                 irc.say(channel, u"⇪文件类型: %s\r\n" % contentsInfo["type"])
 
+    except socket.error as e:
+        sys.stderr.write("Error: %s\n", e)
+        irc.quit("Network error.")
     except Exception as e:
         try:
             irc.say(channel, u"哎呀，%s 好像出了点问题: %s" % (NICK, e))
         except:
             pass
-    except socket.error as e:
-        sys.stderr.write("Error: %s\n", e)
-        irc.quit("Network error.")
 
 # vim: et ft=python sts=4 sw=4 ts=4
