@@ -21,6 +21,7 @@ NICK = "titlebot2"
 IDENT = "titlebot2"
 REALNAME = "titlebot2"
 CHANNELS = ["#kneecircle"]
+ADMINS = ["biergaizi"]  # empty list means disable permission checking
 
 HEADERS = [("Accept-Charset", "utf-8, iso-8859-1"),
            ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"),
@@ -123,6 +124,7 @@ def getWebResourceInfo(h):
 
     return webInfo
 
+
 if __name__ == "__main__":
     try:
         irc = libirc.IRCConnection()
@@ -152,10 +154,19 @@ if __name__ == "__main__":
                 continue
 
             if message["dest"] == NICK:
-                if message["msg"] == u"Get out of this channel!":  # A small hack
-                    irc.quit(u"%s asked to leave." % message["nick"])
-                    running = False
-                    break
+                if message["nick"] in ADMINS:
+                    if message["msg"] == u"Get out of this channel!":  # A small hack
+                        irc.quit(u"%s asked to leave." % message["nick"])
+                        running = False
+                        break
+                    elif message["msg"] == u"Restart!":
+                        irc.quit(u"%s asked to restart." % message["nick"])
+                        running = False
+                        restartProgram()
+                    else:
+                        irc.say(message["nick"], "Unknown Command, 233333...")
+                else:
+                    irc.say(message["nick"], "Permission Denied")
 
             channel = message["dest"]
             words = message["msg"].split()
