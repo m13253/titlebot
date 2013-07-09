@@ -9,6 +9,7 @@ import socket
 socket.setdefaulttimeout(10)
 
 import time
+import cookielib
 import urllib2
 from HTMLParser import HTMLParser as html_parser
 import zlib
@@ -175,7 +176,8 @@ if __name__ == "__main__":
                 if not word or inBlacklist(word):
                     continue
 
-                opener = urllib2.build_opener()
+                cookieJar = cookielib.CookieJar()
+                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
                 opener.addheaders = HEADERS
                 h = opener.open(word.encode("utf-8", "replace"))
 
