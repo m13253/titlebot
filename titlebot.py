@@ -191,7 +191,7 @@ if __name__ == "__main__":
                     irc.say(channel, u"⇪文件类型: %s\r\n" % contentsInfo["type"])
 
         except socket.error as e:
-            sys.stderr.write("Error: %s\n", e)
+            sys.stderr.write("Error: %s\n" % e)
             irc.quit("Network error.")
         except Exception as e:
             try:
