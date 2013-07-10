@@ -75,6 +75,7 @@ def getWebResourceInfo(word):
 
         if h.code not in [200, 206]:
             raise urllib2.HTTPError(code=h.code)
+        return h
 
     def htmlDecode(encodedText):
         decodedText = ""
