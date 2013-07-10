@@ -15,7 +15,7 @@ from HTMLParser import HTMLParser as html_parser
 import zlib
 
 import libirc
-from config import HOST, PORT, NICK, IDENT, CHANNELS, HEADERS
+from config import HOST, PORT, NICK, IDENT, REALNAME, CHANNELS, ADMINS, HEADERS
 
 
 def pickupUrl(text):
