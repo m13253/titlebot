@@ -60,12 +60,21 @@ def restartProgram():
     os.execl(python, python, * sys.argv)
 
 
-def getWebResourceInfo(h):
+def getWebResourceInfo(word):
     webInfo = {
         "type": "",
-        "title": "",
+        "title": None,
         "size": ""
     }
+
+    def openConnection(word):
+        cookieJar = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
+        opener.addheaders = HEADERS
+        h = opener.open(word.encode("utf-8", "replace"))
+
+        if h.code not in [200, 206]:
+            raise urllib2.HTTPError(code=h.code)
 
     def htmlDecode(encodedText):
         decodedText = ""
@@ -104,12 +113,14 @@ def getWebResourceInfo(h):
             pass
         return contents
 
+    h = openConnection(word)
+
     if h.info()["Content-Type"].split(";")[0] == "text/html" or (not "Content-Type" in h.info()):
         webInfo["type"] = "text/html"
         contents = readContents(h)
 
         if h.info().get("Content-Encoding") == "gzip":  # Fix buggy www.bilibili.tv
-            decompressContents(contents)
+            contents = decompressContents(contents)
 
         if contents.find("<title>") != -1:
             encodedTitle = contents.split("<title>")[1].split("</title>")[0]
@@ -176,21 +187,18 @@ if __name__ == "__main__":
                 if not word or inBlacklist(word):
                     continue
 
-                cookieJar = cookielib.CookieJar()
-                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
-                opener.addheaders = HEADERS
-                h = opener.open(word.encode("utf-8", "replace"))
-
-                if h.code not in [200, 206]:
-                    irc.say(channel, u"⇪HTTP %d 错误\r\n" % h.code)
+                try:
+                    contentsInfo = getWebResourceInfo(word)
+                except urllib2.HTTPError as e:
+                    irc.say(channel, u"⇪HTTP %d 错误\r\n" % e.code)
                     continue
-
-                contentsInfo = getWebResourceInfo(h)
 
                 if contentsInfo["type"] == "text/html" and contentsInfo["title"]:
                     irc.say(channel, u"⇪标题: %s" % contentsInfo["title"])
-                elif contentsInfo["type"] == "text/html" and not contentsInfo["title"]:
+                elif contentsInfo["type"] == "text/html" and contentsInfo["title"] == None:
                         irc.say(channel, u"⇪无标题网页")
+                elif contentsInfo["type"] == "text/html" and contentsInfo["title"].strip() == "":
+                    irc.say(channel, u"⇪标题: (空)")
                 elif contentsInfo["size"]:
                     assert contentsInfo["type"]
                     irc.say(channel, u"⇪文件类型: %s, 文件大小: %s 字节\r\n" % (contentsInfo["type"], contentsInfo["size"]))
