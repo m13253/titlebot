@@ -161,6 +161,8 @@ if __name__ == "__main__":
             words = message["msg"].split()
             for word in words:
                 word = pickupUrl(word)
+                if not word:
+                    continue
 
                 try:
                     contentsInfo = getWebResourceInfo(word)
