@@ -29,14 +29,6 @@ def pickupUrl(text):
     return None
 
 
-def inBlacklist(url):
-    url = url.split(">", 1)[0].split('"', 1)[0]
-    if re.match("https?:/*git.io(/|$)", url):
-        # git.io is buggy
-        return True
-    return False
-
-
 def restartProgram():
     time.sleep(10)
     sys.stderr.write("Restarting...\n")
@@ -169,8 +161,6 @@ if __name__ == "__main__":
             words = message["msg"].split()
             for word in words:
                 word = pickupUrl(word)
-                if not word or inBlacklist(word):
-                    continue
 
                 try:
                     contentsInfo = getWebResourceInfo(word)
