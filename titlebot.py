@@ -9,11 +9,12 @@ import time
 import urllib2
 import HTMLParser
 import zlib
+import re
 
 import libirc
 
 HOST="irc.freenode.net"
-PORT=6667
+PORT=6697
 NICK="titlebot"
 IDENT="titlebot"
 REALNAME="titlebot"
@@ -35,7 +36,7 @@ def ParseURL(s):
 
 try:
     c=libirc.IRCConnection()
-    c.connect((HOST, PORT))
+    c.connect((HOST, PORT), use_ssl=True)
     c.setnick(NICK)
     c.setuser(IDENT, REALNAME)
     for CHAN in CHANS:
@@ -72,13 +73,19 @@ while not quiting:
             else:
                 CHAN=line["dest"]
                 for w in line["msg"].split():
+                    if w.startswith(u'magnet:?'):
+                        filename=re.findall(u'(&|&amp;)dn=(.+)(&|&amp;|$)', w)
+                        if len(filename)<1 or len(filename[0])<2:
+                            break
+                        filename=html_parser.unescape(urllib2.unquote(filename[0][1].encode('utf-8', 'replace')).decode('utf-8', 'replace'))
+                        c.say(CHAN, u'⇪文件名: %s' % filename)
+                        break
                     w=ParseURL(w)
                     if w:
                         w=w.split(">", 1)[0].split('"', 1)[0]
-                        if re.match("https?:/*git.io(/|$)", w): # Fix buggy git.io
-                            continue
+                        if re.match("https?:/*git.io(/|$)", w): continue # Fix for git.io
                         opener=urllib2.build_opener()
-                        opener.addheaders = [("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (compatible; Titlebot; like IRCbot; +https://github.com/m13253/titlebot)"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes"), ("X-Requested-With", "Titlebot")]
+                        opener.addheaders = [("Accept", "text/html, image/png, image/webp, image/jpeg, image/gif, */*"), ("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (compatible; Titlebot; like IRCbot; +https://github.com/m13253/titlebot)"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes"), ("X-Requested-With", "Titlebot")]
                         h=opener.open(w.encode("utf-8", "replace"))
                         if h.code==200 or h.code==206:
                             if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
