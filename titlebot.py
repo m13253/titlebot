@@ -74,7 +74,7 @@ while not quiting:
                 CHAN=line["dest"]
                 for w in line["msg"].split():
                     if w.startswith(u'magnet:?'):
-                        filename=re.findall(u'(&|&amp;)dn=(.+)(&|&amp;|$)', w)
+                        filename=re.findall(u'(&|&amp;)dn=([^&]+)', w)
                         if len(filename)<1 or len(filename[0])<2:
                             break
                         filename=html_parser.unescape(urllib2.unquote(filename[0][1].encode('utf-8', 'replace')).decode('utf-8', 'replace'))
