@@ -74,14 +74,16 @@ while not quiting:
                 CHAN=line["dest"]
                 for w in line["msg"].split():
                     if w.startswith(u'magnet:?'):
+                        time.sleep(3)
                         filename=re.findall(u'(&|&amp;)dn=([^&]+)', w)
                         if len(filename)<1 or len(filename[0])<2:
                             break
-                        filename=html_parser.unescape(urllib2.unquote(filename[0][1].encode('utf-8', 'replace')).decode('utf-8', 'replace'))
+                        filename=html_parser.unescape(urllib2.unquote(filename[0][1].encode('utf-8', 'replace')).decode('utf-8', 'replace')).replace(u'\n', u' ').replace(u'\r', u'')
                         c.say(CHAN, u'⇪文件名: %s' % filename)
                         break
                     w=ParseURL(w)
                     if w:
+                        time.sleep(3)
                         w=w.split(">", 1)[0].split('"', 1)[0]
                         if re.match("https?:/*git.io(/|$)", w): continue # Fix for git.io
                         opener=urllib2.build_opener()
