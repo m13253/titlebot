@@ -172,8 +172,8 @@ if __name__ == "__main__":
 
                 if contentsInfo["type"] == "text/html" and contentsInfo["title"]:
                     irc.say(channel, u"⇪标题: %s" % contentsInfo["title"])
-                elif contentsInfo["type"] == "text/html" and contentsInfo["title"] == None:
-                        irc.say(channel, u"⇪无标题网页")
+                elif contentsInfo["type"] == "text/html" and contentsInfo["title"] is None:
+                    irc.say(channel, u"⇪无标题网页")
                 elif contentsInfo["type"] == "text/html" and contentsInfo["title"].strip() == "":
                     irc.say(channel, u"⇪标题: (空)")
                 elif contentsInfo["size"]:
