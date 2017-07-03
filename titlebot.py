@@ -13,29 +13,30 @@ import re
 
 import libirc
 
-HOST="irc.freenode.net"
-PORT=6697
-NICK="titlebot"
-IDENT="titlebot"
-REALNAME="titlebot"
-CHANS=["##Orz"]
+HOST = "irc.freenode.net"
+PORT = 6697
+NICK = "titlebot"
+IDENT = "titlebot"
+REALNAME = "titlebot"
+CHANS = ["##Orz"]
+
 
 def ParseURL(s):
-    http_idx=s.find('http:')
-    https_idx=s.find('https:')
-    if https_idx==-1:
-        if http_idx==-1:
+    http_idx = s.find('http:')
+    https_idx = s.find('https:')
+    if https_idx == -1:
+        if http_idx == -1:
             return None
         else:
             return s[http_idx:]
     else:
-        if http_idx==-1:
+        if http_idx == -1:
             return s[https_idx:]
         else:
             return s[min(http_idx, https_idx):]
 
 try:
-    c=libirc.IRCConnection()
+    c = libirc.IRCConnection()
     c.connect((HOST, PORT), use_ssl=True)
     c.setnick(NICK)
     c.setuser(IDENT, REALNAME)
@@ -46,78 +47,79 @@ except:
     sys.stderr.write("Restarting...\n")
     os.execlp("python2", "python2", __file__)
     raise
-CHAN=CHANS[0]
+CHAN = CHANS[0]
 socket.setdefaulttimeout(10)
 
-html_parser=HTMLParser.HTMLParser()
+html_parser = HTMLParser.HTMLParser()
 
-quiting=False
+quiting = False
 while not quiting:
     if not c.sock:
-        quiting=True
+        quiting = True
         time.sleep(10)
         sys.stderr.write("Restarting...\n")
         os.execlp("python2", "python2", __file__)
         break
     try:
-        line=c.recvline(block=True)
+        line = c.recvline(block=True)
         if not line:
             continue
         sys.stderr.write("%s\n" % line.encode('utf-8', 'replace'))
-        line=c.parse(line=line)
-        if line and line["cmd"]=="PRIVMSG":
-            if line["dest"]==NICK:
-                if line["msg"]==u"Get out of this channel!": # A small hack
+        line = c.parse(line=line)
+        if line and line["cmd"] == "PRIVMSG":
+            if line["dest"] == NICK:
+                if line["msg"] == u"Get out of this channel!":  # A small hack
                     c.quit(u"%s asked to leave." % line["nick"])
-                    quiting=True
+                    quiting = True
             else:
-                CHAN=line["dest"]
+                CHAN = line["dest"]
                 for w in line["msg"].split():
                     if w.startswith(u'magnet:?'):
                         time.sleep(3)
-                        filename=re.findall(u'(&|&amp;)dn=([^&]+)', w)
-                        if len(filename)<1 or len(filename[0])<2:
+                        filename = re.findall(u'(&|&amp;)dn=([^&]+)', w)
+                        if len(filename) < 1 or len(filename[0]) < 2:
                             break
-                        filename=html_parser.unescape(urllib2.unquote(filename[0][1].encode('utf-8', 'replace')).decode('utf-8', 'replace')).replace(u'\n', u' ').replace(u'\r', u'')
+                        filename = html_parser.unescape(urllib2.unquote(filename[0][1].replace(u'+', u' ').encode('utf-8', 'replace')).decode('utf-8', 'replace')).replace(u'\n', u' ').replace(u'\r', u'')
                         c.say(CHAN, u'⇪文件名: %s' % filename)
                         break
-                    w=ParseURL(w)
+                    w = ParseURL(w)
                     if w:
                         time.sleep(3)
-                        w=w.split(">", 1)[0].split('"', 1)[0]
-                        if re.match("https?:/*git.io(/|$)", w): continue # Fix for git.io
-                        opener=urllib2.build_opener()
+                        w = w.split(">", 1)[0].split('"', 1)[0]
+                        if re.match("https?:/*git.io(/|$)", w):
+                            continue  # Fix for git.io
+                        opener = urllib2.build_opener()
                         opener.addheaders = [("Accept", "text/html, image/png, image/webp, image/jpeg, image/gif, */*"), ("Accept-Charset", "utf-8, iso-8859-1"), ("Accept-Language", "zh-cn, zh-hans, zh-tw, zh-hant, zh, en-us, en-gb, en"), ("Range", "bytes=0-16383"), ("User-Agent", "Mozilla/5.0 (compatible; Titlebot; like IRCbot; +https://github.com/m13253/titlebot)"), ("X-Forwarded-For", "10.2.0.101"), ("X-moz", "prefetch"), ("X-Prefetch", "yes"), ("X-Requested-With", "Titlebot")]
-                        h=opener.open(w.encode("utf-8", "replace"))
-                        if h.code==200 or h.code==206:
-                            if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0]=="text/html":
-                                wbuf=h.read(16384)
-                                read_times=1
-                                while len(wbuf)<16384 and read_times<4:
-                                    read_times+=1
-                                    wbuf_=h.read(16384)
+                        h = opener.open(w.encode("utf-8", "replace"))
+                        if h.code == 200 or h.code == 206:
+                            if not "Content-Type" in h.info() or h.info()["Content-Type"].split(";")[0] == "text/html":
+                                wbuf = h.read(16384)
+                                read_times = 1
+                                while len(wbuf) < 16384 and read_times < 4:
+                                    read_times += 1
+                                    wbuf_ = h.read(16384)
                                     if wbuf_:
-                                        wbuf+=wbuf_
+                                        wbuf += wbuf_
                                     else:
                                         break
-                                if "Content-Encoding" in h.info() and h.info()["Content-Encoding"]=="gzip": # Fix buggy www.bilibili.tv
+                                if "Content-Encoding" in h.info() and h.info()["Content-Encoding"] == "gzip":  # Fix buggy www.bilibili.tv
                                     try:
-                                        gunzip_obj=zlib.decompressobj(16+zlib.MAX_WBITS)
-                                        wbuf=gunzip_obj.decompress(wbuf)
+                                        gunzip_obj = zlib.decompressobj(16 + zlib.MAX_WBITS)
+                                        wbuf = gunzip_obj.decompress(wbuf)
                                     except:
                                         pass
-                                if wbuf.find("<title>")!=-1:
-                                    titleenc=wbuf.split("<title>")[1].split("</title>")[0]
-                                    title=None
+                                if wbuf.find("<title>") != -1:
+                                    titleenc = wbuf.split("<title>")[1].split("</title>")[0]
+                                    title = None
                                     for enc in ("utf-8", "gbk", "gb18030", "iso-8859-1"):
                                         try:
-                                            title=titleenc.decode(enc)
+                                            title = titleenc.decode(enc)
                                             break
                                         except UnicodeDecodeError:
                                             pass
-                                    if title==None:
-                                        title=title.decode("utf-8", "replace")
-                                    title=html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
+                                    if title is None:
+                                        title = title.decode("utf-8", "replace")
+                                    title = html_parser.unescape(title).replace("\r", "").replace("\n", " ").strip()
                                     c.say(CHAN, u"⇪标题: %s" % title)
                                 else:
                                     c.say(CHAN, u"⇪无标题网页")
